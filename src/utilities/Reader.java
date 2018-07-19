@@ -11,7 +11,7 @@ import employees.Employee;
 
 public class Reader {
 
-	enum Index {
+	private enum Index {
 		IDEMP(0), IDPROJECT(1), FIRSTDAY(2), LASTDAY(3);
 		
 		int id;
@@ -37,7 +37,6 @@ public class Reader {
 			this.sc = new Scanner(file);
 		} catch (FileNotFoundException e) {
 			throw new Exception("File does not exists: '" + file.getPath() + "'.");
-			//System.out.println(e.getMessage());
 		}
 	}
 	
@@ -64,17 +63,17 @@ public class Reader {
 			
 			// if there is already an Entry for that employee
 			if(employees.get(empId) != null) {
-				
+							
 				// add one more project
 				try {
 					employees.get(empId).addProject(projectId, from, to);
 				} catch (IllegalArgumentException e) {
 					System.out.println(e.getMessage());
-					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to);
+					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to + "'");
 				} 
 				catch (ParseException e) {
 					System.out.println("Cannot parse date!");
-					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to);
+					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to + "'");
 				}
 			}
 			else {
@@ -83,11 +82,11 @@ public class Reader {
 					employees.put(empId, new Employee(empId, projectId, from, to));
 				} catch (IllegalArgumentException e) {
 					System.out.println(e.getMessage());
-					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to);
+					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to + "'");
 				} 
 				catch (ParseException e) {
 					System.out.println("Cannot parse date!");
-					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to);
+					System.out.println("Skipping following line: '" + empId + ", " + projectId + ", " + from + ", " + to + "'");
 				}
 			}
 		}

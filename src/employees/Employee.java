@@ -7,6 +7,7 @@ import java.util.Map;
 
 import exceptions.IncorrectDateFormatException;
 import exceptions.WrongOrderOfDatesException;
+import employees.Project;
 import employees.Company;
 import employees.TimeInterval;
 
@@ -16,11 +17,11 @@ public class Employee {
 	private int id;
 		
 	// Integer represents Project ID
-	private Map<Integer, TimeInterval> projects;
+	private Map<Integer, Project> projects;
 		
 	public Employee(int id, int projectId, String from, String to) throws IllegalArgumentException, ParseException {
 		this.setId(id);
-		this.projects = new HashMap<Integer, TimeInterval>();
+		this.projects = new HashMap<Integer, Project>();
 		this.addProject(projectId, from, to);
 	}
 		
@@ -35,34 +36,39 @@ public class Employee {
 	public int getId() {
 		return id;
 	}
-		
-	public TimeInterval getProjectTimeInterval(Integer projectId) {
-		return this.projects.get(projectId);
-	}
 
-	public Map<Integer, TimeInterval> getProjects() {
+	public Map<Integer, Project> getProjects() {
 		return Collections.unmodifiableMap(this.projects);
 	}
 	
-	public void addProject(int projectId, String from, String to) throws ParseException {
+	public void addProject(int projectId, String from, String to) throws ParseException,IllegalArgumentException {
 		
 		// projectId must be positive
 		if(Company.checkIfIsNotPositive(projectId)) {
 			throw new IllegalArgumentException("Cannot add project with non-positive ID! '" + projectId + "'");
 		}
-		
-		// if there is already Entry in Map for that project - do not add
-		if(this.projects.get(projectId) != null) {
-			return;
-		}
-		
+	
+		TimeInterval interval;
 		try {
-			this.projects.put(projectId, new TimeInterval(from, to));
+			interval = new TimeInterval(from, to);
 		} catch (WrongOrderOfDatesException e) {
 			throw new IllegalArgumentException(e.getMessage());
 		} catch (IncorrectDateFormatException e) {
 			throw new IllegalArgumentException(e.getMessage());
 		}
 		
+		// if there is already Entry in Map for that project - add new interval (if it is correct)
+		if(this.projects.get(projectId) != null) {
+			try {
+				this.projects.get(projectId).addNewInterval(interval);
+			} catch (NullPointerException e) {
+				throw new IllegalArgumentException(e.getMessage());
+			}
+			
+			return;
+		}
+		
+		// else add Entry for that project
+		this.projects.put(projectId, new Project(projectId, interval));
 	}
 }

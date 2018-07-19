@@ -145,13 +145,13 @@ public class TimeInterval {
 		return (int) TimeInterval.daysBetween(firstStart, secondFinish);
 	}
 	
-	private static long daysBetween(Date date1, Date date2) {
-		
-		// this method is in use only if dates are in right order - no need to check
-		long timeInMillis = date2.getTime() - date1.getTime();
-	    
+	//in use only if dates are in right order - no need to check
+	private static int daysBetween(Date date1, Date date2) {
+			
+		// 															add one day 
+		long timeInMillis = date2.getTime() - date1.getTime() + TimeUnit.DAYS.toMillis(1);
+		    
 		// convert milliseconds to days
-		return TimeUnit.DAYS.convert(timeInMillis, TimeUnit.MILLISECONDS);
+		return (int) TimeUnit.DAYS.convert(timeInMillis, TimeUnit.MILLISECONDS);
 	}
-	
 }
