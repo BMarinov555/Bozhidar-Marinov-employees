@@ -12,7 +12,7 @@ import utilities.Reader;
 public class Demo {
 	
 	public static void main(String[] args) {
-	
+		
 		File file = Reader.getUserInputFile();
 		
 		if(file == null) {
@@ -35,5 +35,6 @@ public class Demo {
 		Set<Pair> allPairs = Company.getAllPairs(employees);
 		
 		Company.printBestPair(allPairs);
+		
 	}
 }

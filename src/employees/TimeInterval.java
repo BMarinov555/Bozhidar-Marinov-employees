@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import exceptions.IncorrectDateFormatException;
 import exceptions.WrongOrderOfDatesException;
@@ -21,18 +23,10 @@ public class TimeInterval {
 	}
 		
 	private void setFrom(String from) throws  IncorrectDateFormatException, ParseException {
-		if(!this.checkDate(from)) {
-			throw new IncorrectDateFormatException();
-		}
-			
 		this.from = this.convertToDate(from);
 	}
 		
 	private void setTo(String to) throws ParseException, WrongOrderOfDatesException, IncorrectDateFormatException {
-		if(!this.checkDate(to)) {
-			throw new IncorrectDateFormatException();
-		}
-			
 		Date date = this.convertToDate(to);
 			
 		// check if dates are in right order
@@ -52,34 +46,87 @@ public class TimeInterval {
 		return to;
 	}
 	
-	private boolean checkDate(String date) {
+	private Date convertToDate(String date) throws ParseException, IncorrectDateFormatException {
+		
+		// invalid date
 		if(date == null || date.equals("")) {
-			return false;
+			throw new IncorrectDateFormatException();
 		}
 		
-		// "NULL" is acceptable date
+		// valid date - return today
 		if(date.equals("NULL")) {
-			return true;
-		}
-		
-		// else check if date format is like: 2000-11-01
-		if(!date.matches("[12][0-9]{3}-[01][0-9]-[0-3][0-9]")) {
-			return false;
-		}
-		
-		return true;
-	}
-	
-	private Date convertToDate(String str) throws ParseException {
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		
-		if(str.equals("NULL")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 			// return current date
 			return sdf.parse( sdf.format(new Date()) );
 		}
 		
-		return sdf.parse(str);
+		// date delimiter 
+		char delimiter = this.getDateDelimiter(date);
+		
+		// invalid date
+		if(delimiter == 0) {
+			throw new IncorrectDateFormatException();
+		}
+		
+		SimpleDateFormat sdf = null;
+		
+		// check if date format is YMD
+		if(isYearFirst(date)) {
+			sdf = new SimpleDateFormat("yyyy" + delimiter + "MM" + delimiter + "dd");
+		}
+		else {
+			// check if date format is DMY
+			if(isYearLast(date)) {
+				sdf = new SimpleDateFormat("dd" + delimiter + "MM" + delimiter + "yyyy");
+			}
+			else {
+				// invalid format
+				throw new IncorrectDateFormatException();
+			}
+		}
+		
+		return sdf.parse(date);
+	}
+	
+	// returns 0 if find more than one type of delimiter - incorrect date
+	private char getDateDelimiter(String str) {
+
+		// regular expression that matches every char but digit
+		Pattern p = Pattern.compile("[^0-9]");
+		Matcher m = p.matcher(str);
+		    
+		char delimiter = 0;
+		 
+		// loop through every delimiter
+		//if there are at least 2 different -> incorrect date
+		while(m.find()) {
+		    String match = m.group(0);
+		    char tempChar = match.charAt(0);
+		    	
+		    if(delimiter != 0 && delimiter != tempChar) {
+		    	return 0;
+		    }
+		    	
+		    delimiter = match.charAt(0);
+		}
+		     
+		return delimiter;
+	}
+	
+	private boolean isYearFirst(String date) {
+		// check if date starts with 4 digits
+		Pattern p = Pattern.compile("^[0-9]{4}");
+	    Matcher m = p.matcher(date);
+	    
+		return m.find();
+	}
+	
+	private boolean isYearLast(String date) {
+		// check if date ends with 4 digits
+		Pattern p = Pattern.compile("[0-9]{4}$");
+	    Matcher m = p.matcher(date);
+	    
+		return m.find();
 	}
 	
 	public static int calculateParallelDays(TimeInterval firstInterval, TimeInterval secondInterval) {
